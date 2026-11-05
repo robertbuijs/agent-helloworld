@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 import os
 from typing import List
 
@@ -11,28 +10,21 @@ from google.adk.agents import Agent
 
 from .instructions import PHASE1_INSTRUCTION
 from .tools import build_atlassian_toolset, build_github_toolset
+from .tools.runtime_toolset import RuntimeEnvToolset
 
 load_dotenv()
-
-logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL = "gemini-flash-latest"
 
 
 def _build_tools() -> List[object]:
-    tools: List[object] = []
-    github = build_github_toolset()
-    if github is not None:
-        tools.append(github)
-    atlassian = build_atlassian_toolset()
-    if atlassian is not None:
-        tools.append(atlassian)
-    if not tools:
-        logger.warning(
-            "No MCP toolsets configured. Agent will be conversational only "
-            "until GITHUB_TOKEN and/or Atlassian credentials are set."
-        )
-    return tools
+    # Do not call the builders here. Import (and the pickle taken by
+    # agent_engines.create) runs before Agent Runtime injects Secret Manager
+    # env vars. RuntimeEnvToolset builds the MCP clients on first use.
+    return [
+        RuntimeEnvToolset(build_github_toolset),
+        RuntimeEnvToolset(build_atlassian_toolset),
+    ]
 
 
 root_agent = Agent(
