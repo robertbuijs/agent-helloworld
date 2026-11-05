@@ -1,0 +1,8 @@
+# ADK + Agent Runtime
+google-adk>=1.5.0
+google-cloud-aiplatform[agent_engines,adk]>=1.100.0
+mcp>=1.9.0
+python-dotenv>=1.0.0
+
+# Optional helpers used by deploy script
+google-cloud-secret-manager>=2.20.0
